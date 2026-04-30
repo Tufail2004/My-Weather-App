@@ -1,0 +1,101 @@
+:root{
+  --bg-day: linear-gradient(135deg,#a1c4fd 0%,#c2e9fb 100%);
+  --bg-night: linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%);
+  --glass: rgba(255,255,255,0.12);
+  --glass-2: rgba(255,255,255,0.06);
+  --card:#ffffff33;
+  --accent:#2563eb;
+  --accent-2:#06b6d4;
+  --muted:#94a3b8;
+  --success:#10b981;
+  --danger:#ef4444;
+  --shadow: 0 8px 30px rgba(16,24,40,0.08);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:'Poppins',system-ui,Segoe UI,Roboto,Arial,sans-serif;
+  background:var(--bg-day);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:32px;
+  transition:background 600ms ease;
+}
+
+.app{width:100%;max-width:1000px}
+.app-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.title h1{margin:0;font-weight:600;letter-spacing:0.2px}
+.title .brand{color:var(--accent);margin-left:6px;font-weight:700}
+.subtitle{margin:2px 0 0;font-size:13px;color:var(--muted)}
+
+.controls{display:flex;gap:10px;align-items:center}
+.icon-btn{background:transparent;border:1px solid rgba(255,255,255,0.12);padding:8px;border-radius:8px;color:inherit;cursor:pointer}
+.pill{background:rgba(255,255,255,0.14);border-radius:20px;padding:6px 10px;border:none;cursor:pointer}
+.pill.active{background:var(--accent);color:#fff}
+
+.main{display:grid;grid-template-columns:320px 1fr;gap:20px}
+.search-panel{display:flex;flex-direction:column;gap:12px}
+.search-form{display:flex;gap:8px}
+.search-input{flex:1;padding:12px 14px;border-radius:12px;border:none;background:rgba(255,255,255,0.07);color:inherit}
+.search-input::placeholder{color:var(--muted)}
+.search-btn{padding:12px 14px;border-radius:12px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;cursor:pointer}
+
+.history{display:flex;flex-direction:column;gap:8px}
+.history button{background:transparent;border:none;text-align:left;padding:8px;border-radius:8px;cursor:pointer;color:inherit}
+
+.weather-panel{display:flex;align-items:flex-start}
+.weather-card{flex:1;padding:18px;border-radius:16px;backdrop-filter:blur(8px) saturate(140%);box-shadow:var(--shadow);position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.06)}
+.glass{background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));}
+
+.loader{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(0,0,0,0.04),transparent);}
+.loader::after{content:"";width:48px;height:48px;border-radius:50%;border:5px solid rgba(255,255,255,0.12);border-top-color:rgba(255,255,255,0.8);animation:spin 1s linear infinite}
+.hidden{display:none}
+
+.error{padding:18px;border-radius:12px;background:rgba(239,68,68,0.09);color:var(--danger);display:flex;flex-direction:column;gap:8px}
+.error button{align-self:flex-end;background:transparent;border:none;color:var(--danger);cursor:pointer}
+
+.weather{display:flex;flex-direction:column;gap:12px}
+.weather-top{display:flex;align-items:center;gap:14px}
+.weather-icon{width:84px;height:84px;flex:0 0 84px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));display:flex;align-items:center;justify-content:center;overflow:hidden}
+.weather-icon img{width:72px;height:72px;display:block}
+.weather-info{flex:1}
+.location{font-weight:600}
+.localtime{font-size:13px;color:var(--muted)}
+.temp-block{text-align:right}
+.temp{font-size:48px;font-weight:700}
+.feels{font-size:13px;color:var(--muted)}
+
+.weather-details{display:flex;gap:12px;justify-content:space-between}
+.detail{background:rgba(255,255,255,0.02);padding:10px;border-radius:10px;flex:1;text-align:center}
+.detail span{display:block;font-weight:600;margin-top:6px}
+
+.forecast{margin-top:12px;display:flex;gap:12px}
+.forecast .day{flex:1;padding:8px;border-radius:10px;background:rgba(255,255,255,0.02);text-align:center}
+.forecast .day .date{font-size:13px;color:var(--muted)}
+
+.small{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
+
+@media (max-width:880px){
+  .main{grid-template-columns:1fr;}
+  .weather-top{flex-direction:row}
+}
+
+@media (max-width:480px){
+  body{padding:16px}
+  .temp{font-size:40px}
+  .weather-icon{width:64px;height:64px}
+  .weather-icon img{width:56px;height:56px}
+}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Theme overrides */
+body.dark{background:var(--bg-night);color:#e6eef8}
+body.dark .glass{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04)}
+

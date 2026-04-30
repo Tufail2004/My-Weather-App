@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>weather app by tufail</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+  <div id="app" class="app">
+    <header class="app-header">
+      <div class="title">
+        <h1>Weather<span class="brand">Pro</span></h1>
+        <p class="subtitle">A modern weather experience for your portfolio</p>
+      </div>
+
+      <div class="controls">
+        <button id="geoBtn" title="Use current location" class="icon-btn">📍</button>
+        <div class="toggle-group">
+          <button id="unitToggle" class="pill">°C</button>
+          <button id="themeToggle" class="icon-btn" title="Toggle theme">🌓</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="search-panel">
+        <form id="searchForm" class="search-form" autocomplete="off">
+          <input id="cityInput" class="search-input" placeholder="Search city or lat,lon" aria-label="Search city" />
+          <button id="searchBtn" class="search-btn">Search</button>
+        </form>
+
+        <div id="history" class="history" aria-live="polite"></div>
+      </section>
+
+      <section class="weather-panel">
+        <div id="card" class="weather-card glass">
+          <div id="loader" class="loader hidden"></div>
+          <div id="error" class="error hidden"></div>
+          <div id="weather" class="weather hidden">
+            <div class="weather-top">
+              <div class="weather-icon" id="weatherIcon"></div>
+              <div class="weather-info">
+                <div class="location" id="location"></div>
+                <div class="localtime" id="localtime"></div>
+              </div>
+              <div class="temp-block">
+                <div class="temp" id="temp"></div>
+                <div class="feels" id="feels"></div>
+              </div>
+            </div>
+
+            <div class="weather-details">
+              <div class="detail">Humidity<span id="humidity"></span></div>
+              <div class="detail">Wind<span id="wind"></span></div>
+              <div class="detail">Condition<span id="condition"></span></div>
+            </div>
+          </div>
+
+          <div id="forecast" class="forecast hidden"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer small">Built with WeatherAPI • Responsive • Portfolio-ready</footer>
+  </div>
+
+  <script src="script.js" type="module"></script>
+</body>
+</html>
