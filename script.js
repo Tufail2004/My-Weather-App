@@ -1,162 +1,115 @@
+// Weather App — fetches current weather from WeatherAPI and renders it.
+
+// Your WeatherAPI key
 const API_KEY = '5235e9636d784018ac585542251111';
-const FORECAST_DAYS = 3;
-const BASE = 'https://api.weatherapi.com/v1/forecast.json';
 
-const el = {
-  form: document.getElementById('searchForm'),
-  input: document.getElementById('cityInput'),
-  geoBtn: document.getElementById('geoBtn'),
-  unitToggle: document.getElementById('unitToggle'),
-  history: document.getElementById('history'),
-  loader: document.getElementById('loader'),
-  error: document.getElementById('error'),
-  weather: document.getElementById('weather'),
-  empty: document.getElementById('empty'),
-  icon: document.getElementById('weatherIcon'),
-  location: document.getElementById('location'),
-  localtime: document.getElementById('localtime'),
-  temp: document.getElementById('temp'),
-  condition: document.getElementById('condition'),
-  feels: document.getElementById('feels'),
-  humidity: document.getElementById('humidity'),
-  wind: document.getElementById('wind'),
-  forecast: document.getElementById('forecast'),
-};
+// DOM elements
+const form = document.getElementById('searchForm');
+const input = document.getElementById('cityInput');
+const errorBox = document.getElementById('error');
+const card = document.getElementById('card');
+const emptyState = document.getElementById('empty');
+const loader = document.getElementById('loader');
+const unitCBtn = document.getElementById('unitC');
+const unitFBtn = document.getElementById('unitF');
 
+// 'C' for Celsius, 'F' for Fahrenheit. Remember the user's choice.
 let unit = localStorage.getItem('weather_unit') || 'C';
-let history = JSON.parse(localStorage.getItem('weather_history') || '[]');
-const cache = new Map();
+// Keep the last successful response so switching units re-renders instantly.
+let lastData = null;
 
-const setLoading = (on) => el.loader.classList.toggle('hidden', !on);
+const isCelsius = () => unit === 'C';
 
-const showError = (msg) => {
-  setLoading(false);
-  el.error.textContent = msg;
-  el.error.classList.remove('hidden');
-};
+// Format a temperature in the currently selected unit.
+const formatTemp = (tempC, tempF) =>
+  Math.round(isCelsius() ? tempC : tempF) + '°' + unit;
 
-const clearError = () => {
-  el.error.classList.add('hidden');
-  el.error.textContent = '';
-};
-
-const tempOf = (c, f) => (unit === 'C' ? Math.round(c) + '°C' : Math.round(f) + '°F');
-
-const saveHistory = (q) => {
-  history = [q, ...history.filter((s) => s.toLowerCase() !== q.toLowerCase())].slice(0, 5);
-  localStorage.setItem('weather_history', JSON.stringify(history));
-  renderHistory();
-};
-
-const renderHistory = () => {
-  el.history.innerHTML = '';
-  history.forEach((item) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.textContent = item;
-    b.onclick = () => {
-      el.input.value = item;
-      fetchWeather(item);
-    };
-    el.history.appendChild(b);
-  });
-};
-
-const iconSrc = (icon) => (icon.startsWith('//') ? 'https:' + icon : icon);
-
-function renderWeather(data) {
-  setLoading(false);
-  clearError();
-  const loc = data.location;
-  const cur = data.current;
-
-  el.location.textContent = [loc.name, loc.region, loc.country].filter(Boolean).join(', ');
-  el.localtime.textContent = loc.localtime;
-  el.icon.src = iconSrc(cur.condition.icon);
-  el.icon.alt = cur.condition.text;
-  el.temp.textContent = tempOf(cur.temp_c, cur.temp_f);
-  el.condition.textContent = cur.condition.text;
-  el.feels.textContent = 'Feels like ' + tempOf(cur.feelslike_c, cur.feelslike_f);
-  el.humidity.textContent = cur.humidity + '%';
-  el.wind.textContent = cur.wind_kph + ' kph';
-
-  el.forecast.innerHTML = '';
-  (data.forecast?.forecastday || []).forEach((d) => {
-    const date = new Date(d.date + 'T12:00:00').toLocaleDateString(undefined, {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    });
-    const div = document.createElement('div');
-    div.className = 'day';
-    div.innerHTML =
-      '<div class="d">' + date + '</div>' +
-      '<img src="' + iconSrc(d.day.condition.icon) + '" alt="' + d.day.condition.text + '">' +
-      '<div class="t">' + tempOf(d.day.avgtemp_c, d.day.avgtemp_f) + '</div>';
-    el.forecast.appendChild(div);
-  });
-
-  el.empty.classList.add('hidden');
-  el.weather.classList.remove('hidden');
+function showError(message) {
+  errorBox.textContent = message;
+  errorBox.classList.remove('hidden');
 }
 
-async function fetchWeather(q) {
-  q = (q || '').trim();
-  if (!q) {
+function hideError() {
+  errorBox.classList.add('hidden');
+  errorBox.textContent = '';
+}
+
+// Fetch current weather for a city and render it.
+async function getWeather(city) {
+  const query = city.trim();
+  if (!query) {
     showError('Please enter a city name.');
     return;
   }
-  const key = q.toLowerCase();
-  if (cache.has(key)) {
-    renderWeather(cache.get(key));
-    saveHistory(q);
-    return;
-  }
-  setLoading(true);
-  clearError();
+  hideError();
+
+  // Show the card with a loading spinner.
+  emptyState.classList.add('hidden');
+  card.classList.remove('hidden');
+  loader.classList.remove('hidden');
+
   try {
-    const url = BASE + '?key=' + API_KEY + '&q=' + encodeURIComponent(q) +
-      '&days=' + FORECAST_DAYS + '&aqi=no&alerts=no';
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('not found');
-    const data = await res.json();
-    cache.set(key, data);
+    const url =
+      'https://api.weatherapi.com/v1/current.json' +
+      '?key=' + API_KEY +
+      '&q=' + encodeURIComponent(query) +
+      '&aqi=no';
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('City not found');
+
+    const data = await response.json();
+    lastData = data;
     renderWeather(data);
-    saveHistory(q);
-  } catch (e) {
-    showError('Could not find that place. Try another search.');
+  } catch (err) {
+    loader.classList.add('hidden');
+    card.classList.add('hidden');
+    emptyState.classList.remove('hidden');
+    showError('City not found. Please try another city.');
   }
 }
 
-el.form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  fetchWeather(el.input.value);
-});
+// Fill the weather card with data from the API response.
+function renderWeather(data) {
+  loader.classList.add('hidden');
 
-el.geoBtn.addEventListener('click', () => {
-  if (!navigator.geolocation) {
-    showError('Geolocation is not supported in this browser.');
-    return;
-  }
-  setLoading(true);
-  navigator.geolocation.getCurrentPosition(
-    (pos) => fetchWeather(pos.coords.latitude + ',' + pos.coords.longitude),
-    () => showError('Could not get your location.'),
-    { timeout: 10000 }
-  );
-});
+  const location = data.location;
+  const current = data.current;
 
-el.unitToggle.addEventListener('click', () => {
-  unit = unit === 'C' ? 'F' : 'C';
+  const icon = document.getElementById('weatherIcon');
+  icon.src = 'https:' + current.condition.icon;
+  icon.alt = current.condition.text;
+
+  document.getElementById('temp').textContent =
+    formatTemp(current.temp_c, current.temp_f);
+  document.getElementById('condition').textContent = current.condition.text;
+  document.getElementById('location').textContent =
+    location.name + ', ' + location.country;
+
+  document.getElementById('feels').textContent =
+    formatTemp(current.feelslike_c, current.feelslike_f);
+  document.getElementById('humidity').textContent = current.humidity + '%';
+  document.getElementById('wind').textContent = current.wind_kph + ' km/h';
+  document.getElementById('pressure').textContent = current.pressure_mb + ' hPa';
+  document.getElementById('visibility').textContent = current.vis_km + ' km';
+}
+
+// Switch temperature unit and re-render if we already have data.
+function setUnit(newUnit) {
+  unit = newUnit;
   localStorage.setItem('weather_unit', unit);
-  el.unitToggle.textContent = '°' + unit;
-  const q = el.input.value.trim() || history[0];
-  if (q) fetchWeather(q);
+  unitCBtn.classList.toggle('active', isCelsius());
+  unitFBtn.classList.toggle('active', !isCelsius());
+  if (lastData) renderWeather(lastData);
+}
+
+// Search on button click or Enter key (form submit handles both).
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+  getWeather(input.value);
 });
 
-// init
-el.unitToggle.textContent = '°' + unit;
-renderHistory();
-const start = history[0] || 'Madhubani';
-el.input.value = start;
-fetchWeather(start);
+unitCBtn.addEventListener('click', () => setUnit('C'));
+unitFBtn.addEventListener('click', () => setUnit('F'));
+
+// Apply the saved unit on page load.
+setUnit(unit);
